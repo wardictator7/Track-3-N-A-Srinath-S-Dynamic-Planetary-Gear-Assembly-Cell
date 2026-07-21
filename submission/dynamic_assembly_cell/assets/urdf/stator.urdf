@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<!--
+  STATOR (OUTER RING GEAR) — stator.urdf
+  =========================================================================
+  Source mesh   : meshes/Ring_Gear.obj  (Fusion 360 export, units = cm)
+  Raw bbox      : 6.500 x 6.500 x 1.000 (cm) -> 65mm OD x 10mm thick
+
+  Scale applied : 0.009  (NOT the plain 0.01 cm->m factor used elsewhere)
+  Final size    : 58.5mm OD x 9mm thick.
+
+  WHY THE EXTRA MARGIN: a straight 0.01 conversion leaves this part at
+  65mm OD, i.e. ~81% of the Franka's 80mm max jaw opening. That is too
+  tight a margin for a reliable grasp — at near-max opening the fingers
+  have little travel left to compensate for approach error or contact
+  compliance, and the grasp is prone to slipping loose. Scaling to 0.009
+  brings the OD down to 58.5mm (~73% of max opening), giving a
+  comfortable clamping margin while remaining a "large" component
+  relative to the sun/planet gears.
+
+  Mass hardcoded to 1.0 kg per spec (simulation override).
+-->
+<robot name="stator">
+
+  <material name="dark_steel">
+    <color rgba="0.20 0.20 0.23 1.0"/>
+  </material>
+
+  <link name="stator_link">
+
+    <inertial>
+      <!--
+        Approximated as a solid cylinder (ring treated as a disc for
+        inertia purposes): r=0.02925m, h=0.009m, m=1.0kg.
+      -->
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="1.0"/>
+      <inertia ixx="2.207e-04" ixy="0.0" ixz="0.0"
+               iyy="2.207e-04" iyz="0.0"
+               izz="4.278e-04"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="../meshes/Ring_Gear.obj" scale="0.009 0.009 0.009"/>
+      </geometry>
+      <material name="dark_steel"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="../meshes/Ring_Gear.obj" scale="0.009 0.009 0.009"/>
+      </geometry>
+    </collision>
+
+  </link>
+
+  <!--
+    Genesis friction: set at load time via material, e.g.
+        gs.materials.Rigid(friction=1.0)
+    A full 1.0 mu is recommended here since the stator's outer race is
+    the only graspable surface and slip would be immediately visible as
+    misalignment during ring-gear seating.
+  -->
+  <gazebo reference="stator_link">
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+  </gazebo>
+
+</robot>

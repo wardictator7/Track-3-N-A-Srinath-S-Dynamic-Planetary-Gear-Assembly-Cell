@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<!--
+  CARRIER PLATE — carrier_plate.urdf
+  =========================================================================
+  Source mesh   : meshes/Carrier.obj  (Fusion 360 export, units = cm)
+  Raw bbox      : 4.608 x 5.350 x 4.191 (cm) -> ~46 x 53.5 x 42 mm
+  Scale applied : 0.01  (cm -> m)
+  Final size    : ~46 x 53.5 x 42 mm -> largest axis (53.5mm) is well
+                  under the 80mm gripper opening; part is graspable
+                  across any of its three principal axes.
+
+  Mass hardcoded to 1.0 kg per spec (simulation override).
+-->
+<robot name="carrier_plate">
+
+  <material name="anthracite_steel">
+    <color rgba="0.16 0.16 0.18 1.0"/>
+  </material>
+
+  <link name="carrier_plate_link">
+
+    <inertial>
+      <!--
+        Approximated as a solid box: Lx=0.04608m, Ly=0.0535m, Lz=0.04191m,
+        m=1.0kg. Box approximation chosen over a disk because the carrier
+        mesh's largest extent (Y) exceeds its in-plane extents, indicating
+        integrated pin/post geometry rather than a flat disc.
+      -->
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="1.0"/>
+      <inertia ixx="3.848e-04" ixy="0.0" ixz="0.0"
+               iyy="3.233e-04" iyz="0.0"
+               izz="4.154e-04"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="../meshes/Carrier.obj" scale="0.01 0.01 0.01"/>
+      </geometry>
+      <material name="anthracite_steel"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="../meshes/Carrier.obj" scale="0.01 0.01 0.01"/>
+      </geometry>
+    </collision>
+
+  </link>
+
+  <!--
+    Genesis friction: set at load time via material, e.g.
+        gs.materials.Rigid(friction=1.0)
+  -->
+  <gazebo reference="carrier_plate_link">
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+  </gazebo>
+
+</robot>

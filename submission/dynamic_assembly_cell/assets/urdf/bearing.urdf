@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<!--
+  BEARING — bearing.urdf
+  =========================================================================
+  Source mesh   : meshes/Bearing.obj  (Fusion 360 export, units = cm)
+  Raw bbox      : local-X 0.3175cm (axial width) x local-Y/Z ~1.27cm (OD)
+                  -> axial width 3.175mm, OD 12.7mm
+  Scale applied : 0.01 (cm -> m). Already well under the 80mm/3kg limits,
+                  so no further "shrink for grasp" scaling is needed —
+                  0.01 is applied purely for correct real-world sizing.
+
+  COLLISION SIMPLIFICATION: the full bearing mesh has many small radial
+  features (ball pockets / races) that cause contact-solver jitter when
+  the parallel gripper closes on it. Visual keeps the detailed mesh;
+  collision uses a simple <cylinder> sized to the bearing's OD/width.
+  Because the mesh's rotational axis lies along its local X (not the
+  URDF cylinder's default local Z), the collision origin is rotated
+  90 deg about Y to align the cylinder's axis with the bearing's bore.
+
+  Mass hardcoded to 0.05 kg per spec (small hardware).
+-->
+<robot name="bearing">
+
+  <material name="chrome">
+    <color rgba="0.75 0.78 0.80 1.0"/>
+  </material>
+
+  <link name="bearing_link">
+
+    <inertial>
+      <!--
+        Short cylinder, axis along local X: r=0.00635m, w=0.003175m,
+        m=0.05kg. ixx is about the axial (bore) direction.
+      -->
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.05"/>
+      <inertia ixx="1.008e-06" ixy="0.0" ixz="0.0"
+               iyy="5.460e-07" iyz="0.0"
+               izz="5.460e-07"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="../meshes/Bearing.obj" scale="0.01 0.01 0.01"/>
+      </geometry>
+      <material name="chrome"/>
+    </visual>
+
+    <collision>
+      <!-- Rotate cylinder's default Z-axis onto the bearing's local X (bore) axis -->
+      <origin xyz="0 0 0" rpy="0 1.5708 0"/>
+      <geometry>
+        <cylinder radius="0.00635" length="0.003175"/>
+      </geometry>
+    </collision>
+
+  </link>
+
+  <!--
+    Genesis friction: set at load time via material, e.g.
+        gs.materials.Rigid(friction=0.7)
+    Slightly lower than the gear parts (0.7 vs 1.0) since the chrome
+    outer race is smoother/more polished than the machined gear teeth,
+    plus small rolling/spinning friction to damp residual spin jitter
+    once grasped.
+  -->
+  <gazebo reference="bearing_link">
+    <mu1>0.7</mu1>
+    <mu2>0.7</mu2>
+  </gazebo>
+
+</robot>

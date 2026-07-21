@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<!--
+  PLANET GEAR — planet_gear.urdf
+  =========================================================================
+  Source mesh   : meshes/Planet_Gear.obj  (Fusion 360 export, units = cm)
+  Raw bbox      : 2.599 x 2.599 x 4.000 (cm) -> 26mm dia x 40mm tall
+  Scale applied : 0.01  (cm -> m)
+  Final size    : 26mm dia x 40mm tall -> comfortably under the 80mm
+                  gripper opening and the 3kg payload limit.
+
+  Spawn this URDF multiple times (e.g. 3-4 instances) with unique link/
+  joint namespacing per instance if you load them into one combined
+  scene graph; as standalone Genesis entities each spawn is independent
+  so no renaming is required.
+
+  Mass hardcoded to 1.0 kg per spec (simulation override, not a
+  physically accurate density-based value for a 26x40mm steel part).
+-->
+<robot name="planet_gear">
+
+  <material name="dark_steel">
+    <color rgba="0.22 0.22 0.25 1.0"/>
+  </material>
+
+  <link name="planet_gear_link">
+
+    <inertial>
+      <!-- Solid cylinder approx: r=0.013m, h=0.04m, m=1.0kg -->
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="1.0"/>
+      <inertia ixx="1.756e-04" ixy="0.0" ixz="0.0"
+               iyy="1.756e-04" iyz="0.0"
+               izz="8.450e-05"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="../meshes/Planet_Gear.obj" scale="0.01 0.01 0.01"/>
+      </geometry>
+      <material name="dark_steel"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="../meshes/Planet_Gear.obj" scale="0.01 0.01 0.01"/>
+      </geometry>
+    </collision>
+
+  </link>
+
+  <!--
+    Genesis friction: set at load time via material, e.g.
+        gs.materials.Rigid(friction=1.0)
+    <gazebo> mu1/mu2 kept for cross-engine portability.
+  -->
+  <gazebo reference="planet_gear_link">
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+  </gazebo>
+
+</robot>

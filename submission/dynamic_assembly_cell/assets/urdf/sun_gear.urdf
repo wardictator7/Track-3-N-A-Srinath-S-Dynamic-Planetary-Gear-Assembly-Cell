@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<!--
+  SUN GEAR — sun_gear.urdf
+  =========================================================================
+  Source mesh   : meshes/Sun_Gear.obj  (Fusion 360 export, units = cm)
+  Raw bbox      : 1.400 x 1.400 x 4.000  (cm)  ->  14mm dia x 40mm tall
+  Scale applied : 0.01  (cm -> m, standard Fusion OBJ export convention)
+  Final size    : 14mm dia x 40mm tall  ->  well under the 80mm Franka
+                  Panda gripper opening and the 3kg payload limit.
+
+  NOTE: Even though the prompt's "heavy-duty" framing implies scaling is
+  needed to bring an oversized part down to graspable size, this mesh's
+  native units (cm) already correspond to a small pinion. The 0.01 scale
+  is still MANDATORY, because without it Genesis/URDF will interpret the
+  raw vertex data as meters and spawn a 1.4m x 4m gear. Do not omit it.
+
+  Mass is hardcoded to 1.0 kg per spec, even though a real 14x40mm steel
+  pinion would weigh only a few grams — this is a deliberate simulation
+  override to stress-test the Franka's payload margin, not a physically
+  accurate density estimate.
+-->
+<robot name="sun_gear">
+
+  <material name="dark_steel">
+    <color rgba="0.22 0.22 0.25 1.0"/>
+  </material>
+
+  <link name="sun_gear_link">
+
+    <inertial>
+      <!-- Approximated as a solid cylinder: r=0.007m, h=0.04m, m=1.0kg -->
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="1.0"/>
+      <inertia ixx="1.456e-04" ixy="0.0" ixz="0.0"
+               iyy="1.456e-04" iyz="0.0"
+               izz="2.450e-05"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="../meshes/Sun_Gear.obj" scale="0.01 0.01 0.01"/>
+      </geometry>
+      <material name="dark_steel"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <!-- Full mesh collision retained (large part, not hardware) -->
+        <mesh filename="../meshes/Sun_Gear.obj" scale="0.01 0.01 0.01"/>
+      </geometry>
+    </collision>
+
+  </link>
+
+  <!--
+    Friction: plain URDF has no native contact-friction tag (only joint
+    <dynamics> friction, which applies to actuated joints, not grasp
+    contacts). The <gazebo> mu1/mu2 block below is the de-facto standard
+    extension recognized by many URDF-consuming pipelines. For Genesis
+    specifically, set friction on the entity's material at load time:
+
+        sun_gear = scene.add_entity(
+            gs.morphs.URDF(file="urdf/sun_gear.urdf"),
+            material=gs.materials.Rigid(friction=1.0),
+        )
+
+    A friction coefficient of ~1.0 is recommended for a smooth-machined
+    steel gear against the Franka's rubber/silicone finger pads.
+  -->
+  <gazebo reference="sun_gear_link">
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+  </gazebo>
+
+</robot>

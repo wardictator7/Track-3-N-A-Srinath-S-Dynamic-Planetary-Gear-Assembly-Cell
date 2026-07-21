@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<!--
+  NUT (M3 FASTENER) — nut.urdf
+  =========================================================================
+  Source mesh   : meshes/M3_Nut.obj  (Fusion 360 export, units = cm)
+  Raw bbox      : 0.700 x 0.808 x 0.600 (cm) -> 7mm x 8.08mm x 6mm
+  Scale applied : 0.01 (cm -> m). Already tiny relative to gripper/payload
+                  limits — scaling is purely the cm->m unit correction.
+
+  COLLISION SIMPLIFICATION: hex-nut mesh edges/chamfers are a common
+  source of solver jitter for a two-finger grasp. Visual keeps the
+  detailed mesh; collision uses a simple <box> sized to the nut's
+  across-flats/thickness bounding dimensions.
+
+  Mass hardcoded to 0.05 kg per spec (small hardware).
+-->
+<robot name="nut">
+
+  <material name="black_oxide">
+    <!-- Swap to rgba="0.71 0.55 0.15 1.0" for a brass finish if preferred -->
+    <color rgba="0.05 0.05 0.05 1.0"/>
+  </material>
+
+  <link name="nut_link">
+
+    <inertial>
+      <!-- Box approx: Lx=0.007m, Ly=0.00808m, Lz=0.006m, m=0.05kg -->
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.05"/>
+      <inertia ixx="4.220e-07" ixy="0.0" ixz="0.0"
+               iyy="3.540e-07" iyz="0.0"
+               izz="4.760e-07"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="../meshes/M3_Nut.obj" scale="0.01 0.01 0.01"/>
+      </geometry>
+      <material name="black_oxide"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.007 0.00808 0.006"/>
+      </geometry>
+    </collision>
+
+  </link>
+
+  <!--
+    Genesis friction: set at load time via material, e.g.
+        gs.materials.Rigid(friction=0.9)
+    Black-oxide finish is slightly less polished than bare/chrome steel,
+    so a marginally higher mu than the bearing is used here.
+  -->
+  <gazebo reference="nut_link">
+    <mu1>0.9</mu1>
+    <mu2>0.9</mu2>
+  </gazebo>
+
+</robot>
